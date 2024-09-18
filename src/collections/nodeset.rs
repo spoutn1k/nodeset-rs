@@ -380,7 +380,7 @@ impl From<CustomError<&str>> for NodeSetParseError {
     fn from(e: CustomError<&str>) -> Self {
         match e {
             CustomError::NodeSetError(e) => e,
-            CustomError::Nom(e, _) => NodeSetParseError::Generic(e.to_string()),
+            CustomError::ParserErrorKind(e, _) => NodeSetParseError::Generic(e.to_string()),
         }
     }
 }
