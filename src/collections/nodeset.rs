@@ -517,8 +517,8 @@ pub enum NodeSetParseError {
     Generic(String),
 
     /// Padding sizes at both ends of a range do not match (ie `[01-003]`).
-    #[error("mismatched padding: '{0}'")]
-    Padding(String),
+    #[error("mismatched padding")]
+    Padding,
 
     /// A reference was made to a group source that does not exist.
     #[error("Unknown group source: '{0}'")]
