@@ -390,7 +390,6 @@ impl<'a, 'k> Parser<'a> {
 
     #[allow(clippy::type_complexity)]
     fn id_range_step(i: &mut &'k str) -> PResult<'k, IdRangeStep> {
-        let current = String::from(*i);
         (digit1, opt(("-", digit1, opt(("/", digit1))))).try_map(
             |s: (&str, Option<(&str, &str, Option<(&str, &str)>)>)| -> Result<IdRangeStep, NodeSetParseError> {
                 let start = s.0.parse::<u32>()?;
@@ -402,7 +401,7 @@ impl<'a, 'k> Parser<'a> {
 
                         padded |= Self::is_padded(s1.1);
                         if padded && s1.1.len() != s.0.len() {
-                            return Err(NodeSetParseError::Padding(current.to_owned()));
+                            return Err(NodeSetParseError::Padding);
                         }
 
                         let end = s1.1.parse::<u32>() ?;
