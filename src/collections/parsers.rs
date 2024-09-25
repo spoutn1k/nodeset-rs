@@ -9,7 +9,8 @@ use std::convert::TryInto;
 use winnow::{
     ascii::{digit1, multispace0, multispace1},
     combinator::{
-        alt, delimited, eof, opt, peek, preceded, repeat, separated, separated_pair, terminated,
+        alt, cut_err, delimited, eof, opt, peek, preceded, repeat, separated, separated_pair,
+        terminated,
     },
     error::{ErrMode, ErrorKind, FromExternalError, ParserError},
     stream::Stream,
@@ -348,7 +349,7 @@ impl<'a, 'k> Parser<'a> {
     fn id_range_bracketed_affix(i: &mut &'k str) -> PResult<'k, IdRangeComponent> {
         (
             opt(digit1),
-            delimited("[", separated(1.., Self::id_range_step, ","), "]"),
+            delimited("[", separated(1.., cut_err(Self::id_range_step), ","), "]"),
             opt(digit1),
         )
             .try_map(|(high, ranges, low)| {
@@ -390,6 +391,7 @@ impl<'a, 'k> Parser<'a> {
 
     #[allow(clippy::type_complexity)]
     fn id_range_step(i: &mut &'k str) -> PResult<'k, IdRangeStep> {
+        #[allow(suspicious_double_ref_op)]
         (digit1, opt(("-", digit1, opt(("/", digit1))))).try_map(
             |s: (&str, Option<(&str, &str, Option<(&str, &str)>)>)| -> Result<IdRangeStep, NodeSetParseError> {
                 let start = s.0.parse::<u32>()?;
@@ -401,7 +403,7 @@ impl<'a, 'k> Parser<'a> {
 
                         padded |= Self::is_padded(s1.1);
                         if padded && s1.1.len() != s.0.len() {
-                            return Err(NodeSetParseError::Padding);
+                            return Err(NodeSetParseError::MismatchedPadding(s.0.to_string(), s1.1.to_string()));
                         }
 
                         let end = s1.1.parse::<u32>() ?;
