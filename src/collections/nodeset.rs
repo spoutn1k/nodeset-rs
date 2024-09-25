@@ -523,6 +523,10 @@ pub enum NodeSetParseError {
     /// A reference was made to a group source that does not exist.
     #[error("Unknown group source: '{0}'")]
     Source(String),
+
+    /// An unknown group was referenced.
+    #[error("Unknown group: '{0}'")]
+    UnknownGroup(String),
 }
 
 #[cfg(test)]
